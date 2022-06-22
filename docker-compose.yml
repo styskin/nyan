@@ -9,3 +9,21 @@ services:
       - ./mongo:/data/db
     ports:
       - 27017:27017
+  crawler:
+    build: .
+    ports:
+      - 6800:6800
+    volumes:
+      - .:/scrapy
+    depends_on:
+      - mongodb
+    
+  bot:
+    build:
+      context: .
+      dockerfile: bot.Dockerfile
+    volumes:
+      - .:/bot
+    depends_on:
+      - mongodb
+    
