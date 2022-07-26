@@ -8,6 +8,7 @@ from nyan.annotator import Annotator
 from nyan.client import TelegramClient
 from nyan.clusters import Clusters
 from nyan.clusterer import Clusterer
+from nyan.channels import Channels
 from nyan.document import read_documents_file, read_documents_mongo
 from nyan.renderer import Renderer
 from nyan.util import get_current_ts, ts_to_dt
@@ -27,6 +28,7 @@ def main(
     assert input_path and not mongo_config_path or mongo_config_path and not input_path
     client = TelegramClient(client_config_path)
     annotator = Annotator(annotator_config_path, channels_info_path)
+    channels = Channels.load(channels_info_path)
     clusterer = Clusterer(clusterer_config_path)
     renderer = Renderer(renderer_config_path)
 
@@ -43,8 +45,6 @@ def main(
         elif posted_clusters_path and os.path.exists(posted_clusters_path):
             print("Reading clusters from file")
             posted_clusters = Clusters.load(posted_clusters_path)
-        else:
-            assert False
         print("{} clusters loaded".format(len(posted_clusters)))
 
         try:
@@ -68,6 +68,14 @@ def main(
             print("Waiting for documents...")
             sleep(10)
             continue
+
+        doc_channels_cnt = Counter()
+        for doc in docs:
+            doc_channels_cnt[doc.channel_id] += 1
+        for channel_id, channel in channels:
+            cnt = doc_channels_cnt.get(channel_id, 0)
+            if cnt <= 1 and not channel.disabled:
+                print("Warning: {} docs from channel {}".format(cnt, channel_id))
 
         docs = annotator(docs)
         print("{} docs after annotator".format(len(docs)))
@@ -128,9 +136,12 @@ def main(
             message_id = int(result["message_id"] if "message_id" in result else result[0]["message_id"])
             cluster.message_id = message_id
             posted_clusters[message_id] = cluster
-            print("Message id: {}".format(message_id))
-
             cluster.create_time = get_current_ts()
+            print("Message id: {}, saving".format(message_id))
+            if posted_clusters_path:
+                posted_clusters.save(posted_clusters_path)
+            if mongo_config_path:
+                posted_clusters.save_to_mongo(mongo_config_path)
 
             client.update_discussion_mapping()
             discussion_message_id = client.get_discussion(message_id)
@@ -145,9 +156,10 @@ def main(
         if posted_clusters_path:
             posted_clusters.save(posted_clusters_path)
             print("{} clusters saved to file".format(len(posted_clusters)))
-        posted_clusters.save_to_mongo(mongo_config_path)
-        print("{} clusters saved to Mongo".format(len(posted_clusters)))
-        print()
+        if mongo_config_path:
+            posted_clusters.save_to_mongo(mongo_config_path)
+            print("{} clusters saved to Mongo".format(len(posted_clusters)))
+            print()
 
 
 if __name__ == "__main__":
@@ -155,7 +167,7 @@ if __name__ == "__main__":
     parser.add_argument("--input-path", type=str, default=None)
     parser.add_argument("--documents-offset", type=int, default=9 * 3600)
     parser.add_argument("--channels-info-path", type=str, default="channels.json")
-    parser.add_argument("--mongo-config-path", type=str, default="configs/mongo_config.json")
+    parser.add_argument("--mongo-config-path", type=str, default=None)
     parser.add_argument("--posted-clusters-path", type=str, default=None)
     parser.add_argument("--client-config-path", type=str, default="configs/client_config.json")
     parser.add_argument("--annotator-config-path", type=str, default="configs/annotator_config.json")
