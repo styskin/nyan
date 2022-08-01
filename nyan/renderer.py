@@ -1,6 +1,7 @@
 import copy
 import os
 import json
+from urllib.parse import urlsplit
 from collections import defaultdict, Counter
 from datetime import datetime
 from statistics import mean
@@ -45,13 +46,25 @@ class Renderer:
 
         first_doc = copy.deepcopy(cluster.first_doc)
         first_doc.pub_time = datetime.fromtimestamp(first_doc.pub_time + 3 * 3600) # MSK timezone?
+
+        external_link = None
+        if cluster.external_links:
+            external_link_url, el_cnt = cluster.external_links.most_common()[0]
+            external_link_host = urlsplit(external_link_url).netloc
+            if el_cnt >= 2:
+                external_link = {
+                    "url": external_link_url,
+                    "host": external_link_host
+                }
+
         return self.cluster_template.render(
             cluster=cluster,
             annotation_doc=cluster.annotation_doc,
             first_doc=first_doc,
             groups=groups,
             views=views,
-            is_important=cluster.is_important
+            is_important=cluster.is_important,
+            external_link=external_link
         )
 
     def render_discussion_message(self, doc):
@@ -96,8 +109,10 @@ class Renderer:
                         collocations[(ch1, ch2)] += 1
 
         assert best_cluster
-        assert best_red_cluster
-        assert best_blue_cluster
+        if not best_red_cluster.message_id:
+            best_red_cluster = None
+        if not best_blue_cluster.message_id:
+            best_blue_cluster = None
 
         average_lag_minutes = int(mean(lags) // 60)
         cluster_frequency = duration // 60 // cluster_count

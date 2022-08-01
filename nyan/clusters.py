@@ -151,12 +151,21 @@ class Cluster:
         return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
     @property
+    def unique_docs(self):
+        return [doc for doc in self.docs if not doc.forward_from]
+
+    @property
     def external_links(self):
         links = Counter()
-        for doc in self.docs:
-            for link in doc.links:
+        used_channels = set()
+        for doc in self.unique_docs:
+            doc_links = set(doc.links)
+            if doc.channel_id in used_channels:
+                continue
+            for link in doc_links:
                 if "t.me" not in link and "http" in link:
                     links[link] += 1
+                    used_channels.add(doc.channel_id)
         return links
 
     @property
@@ -172,10 +181,10 @@ class Cluster:
         red_part = red_count / all_count
         purple_part = purple_count / all_count
 
-        if blue_part + purple_part >= 0.85:
-            return "blue"
-        if red_part + purple_part >= 0.85:
+        if blue_part == 0.0 and red_part > 0.5:
             return "red"
+        if red_part == 0.0 and blue_part > 0.5:
+            return "blue"
         return "purple"
 
     # Serialization
