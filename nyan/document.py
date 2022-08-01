@@ -2,9 +2,7 @@ import json
 import os
 from typing import List
 from dataclasses import dataclass, asdict, fields
-
 from nyan.mongo import get_documents_collection
-
 
 @dataclass
 class Document:
@@ -48,7 +46,6 @@ class Document:
 
     def serialize(self):
         return json.dumps(self.asdict(), ensure_ascii=False)
-
 
 def read_documents_file(file_path, current_ts=None, offset=None):
     assert os.path.exists(file_path)

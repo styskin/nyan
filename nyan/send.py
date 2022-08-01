@@ -11,7 +11,7 @@ from nyan.clusterer import Clusterer
 from nyan.document import read_documents_file, read_documents_mongo
 from nyan.renderer import Renderer
 from nyan.util import get_current_ts, ts_to_dt
-
+from nyan.translate import Translator
 
 def main(
     input_path,
@@ -29,6 +29,7 @@ def main(
     annotator = Annotator(annotator_config_path, channels_info_path)
     clusterer = Clusterer(clusterer_config_path)
     renderer = Renderer(renderer_config_path)
+    translator = Translator(annotator_config_path)
 
     while True:
         if input_path and not os.path.exists(input_path):
@@ -98,7 +99,10 @@ def main(
                 current_ts = get_current_ts()
                 time_diff = abs(current_ts - posted_cluster.pub_time_percentile)
                 if time_diff < 3600 * 3 and posted_cluster.changed():
+                    # Translate
+                    posted_cluster._ttext = translator(posted_cluster.annotation_doc.text)
                     cluster_text = renderer.render_cluster(posted_cluster)
+
                     print()
                     print("Update cluster {}: {}".format(message_id, posted_cluster.cropped_title))
                     print("Discussion message id: {}".format(discussion_message_id))
@@ -113,7 +117,9 @@ def main(
                     print("Same cluster {}: {}".format(message_id, posted_cluster.cropped_title))
                 continue
 
+            cluster._ttext = translator(cluster.annotation_doc.text)
             cluster_text = renderer.render_cluster(cluster)
+
             print()
             print("New cluster:", cluster.cropped_title)
 

@@ -1,5 +1,7 @@
 mkdir -p data;
 
+sleep 30
+
 while :
 do
     python3 -m nyan.send \

@@ -88,7 +88,11 @@ class Cluster:
 
     @cached_property
     def cropped_title(self):
-        return " ".join(self.annotation_doc.text.split()[:10]) + "..."
+        return " ".join(self.ttext.split()[:10]) + "..."
+
+    @property
+    def ttext(self):
+        return self._ttext if hasattr(self, "_ttext") else self.annotation_doc.text
 
     @property
     def urls(self):
@@ -116,7 +120,8 @@ class Cluster:
             distances = [cosine(doc1.embedding, doc2.embedding) for doc2 in docs]
             avg_distances[doc1.url] = mean(distances)
 
-        filtered_docs = [d for d in docs if d.language == "ru"]
+        #filtered_docs = [d for d in docs if d.language == "ru"]
+        filtered_docs = [d for d in docs]
         if filtered_docs:
             docs = filtered_docs
 

@@ -75,7 +75,7 @@ class Annotator:
         texts = [d.text for d in docs]
         embeddings = self.embedder(texts)
         for d, embedding in zip(docs, embeddings):
-            d.embedding = embedding.numpy()
+            d.embedding = embedding
         return docs
 
     def predict_language(self, doc):

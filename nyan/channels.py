@@ -15,6 +15,8 @@ class Channel:
             return None
         keys = {f.name for f in fields(cls)}
         d = {k: v for k, v in d.items() if k in keys}
+        if "alias" not in d:
+            d["alias"] = d["name"]
         return cls(**d)
 
     def asdict(self):

@@ -44,8 +44,9 @@ class Renderer:
         views = cluster.views_str
 
         first_doc = copy.deepcopy(cluster.first_doc)
-        first_doc.pub_time = datetime.fromtimestamp(first_doc.pub_time + 3 * 3600)
+        first_doc.pub_time = datetime.fromtimestamp(first_doc.pub_time + 3 * 3600) # MSK timezone?
         return self.cluster_template.render(
+            cluster=cluster,
             annotation_doc=cluster.annotation_doc,
             first_doc=first_doc,
             groups=groups,

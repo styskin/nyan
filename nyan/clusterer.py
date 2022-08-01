@@ -64,9 +64,10 @@ class Clusterer:
         for cluster in clusters:
             unique_channels = {d.channel_id for d in cluster.docs}
             is_big_cluster = len(unique_channels) >= filtering_config["min_channels"]
-            has_ru_doc = any(doc.language == "ru" for doc in cluster.docs)
+            #has_ru_doc = any(doc.language == "ru" for doc in cluster.docs)
             is_fresh = cluster.age < filtering_config["max_age_minutes"] * 60
-            if is_big_cluster and has_ru_doc and is_fresh:
+            #if is_big_cluster and has_ru_doc and is_fresh:
+            if is_big_cluster:
                 filtered_clusters.append(cluster)
         clusters = filtered_clusters
 

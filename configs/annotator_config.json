@@ -1,5 +1,5 @@
 {
-    "model_name": "models/labse_news",
+    "model_name": "sentence-transformers/LaBSE",
     "text_processor": {
         "rm_substrings": [
             "ДАННОЕ СООБЩЕНИЕ (МАТЕРИАЛ) СОЗДАНО И (ИЛИ) РАСПРОСТРАНЕНО ИНОСТРАННЫМ СРЕДСТВОМ МАССОВОЙ ИНФОРМАЦИИ, ВЫПОЛНЯЮЩИМ ФУНКЦИИ ИНОСТРАННОГО АГЕНТА, И (ИЛИ) РОССИЙСКИМ ЮРИДИЧЕСКИМ ЛИЦОМ, ВЫПОЛНЯЮЩИМ ФУНКЦИИ ИНОСТРАННОГО АГЕНТА",
@@ -30,6 +30,8 @@
             "хуй", "пизд"
         ]
     },
-    "lang_detector": "models/lang_detect_v10.ftz",
-    "cat_detector": "models/ru_cat_v5.ftz"
+    "yandex_translate_api": "trnsl.1.1.20150722T103054Z.776a808a2a79ff07.9d77af22aeb76d8215c19b1ab3725a3ff2965989",
+    "translate_lang": "fa-ru",
+    "cloud_translate": "t1.9euelZqUxsqcx8eKypCZz5KUypCKi-3rnpWalc3PjIqVmsyRx5aNkI6cj8fl8_duHQBp-e8tDhED_t3z9y5MfWj57y0OEQP-.OclKpH1Da6tAa8pcfBwkyDuXBTIbhwW5wM9IZEurJeOLVCrVuMGW01-zoaJ_vEmMIbka2bJP25fmkKso3QLmCg",
+    "cloud_folder": "b1gfndcorcrcjgp1s8l7"
 }
